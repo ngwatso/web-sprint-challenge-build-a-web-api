@@ -2,6 +2,7 @@
 const actionsRouter = require('express').Router();
 
 const Actions = require('./actions-model');
+const Middleware = require('../middleware');
 
 // ** Actions Endpoints
 
