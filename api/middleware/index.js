@@ -38,4 +38,46 @@ async function validateActionId(req, res, next) {
 	}
 }
 
-module.exports = { validateAction, validateActionId };
+// ** Projects middleware
+
+function validateProject(req, res, next) {
+	if (req.body && Object.keys(req.body).length > 1) {
+		next();
+	} else if (!req.body.description) {
+		next({
+			...Error(),
+			status: 400,
+			message: 'missing required description field',
+		});
+	} else if (!req.body.notes) {
+		next({
+			...Error(),
+			status: 400,
+			message: 'missing required notes field',
+		});
+	} else {
+		next({ ...Error(), status: 400, message: 'missing project data' });
+	}
+}
+
+async function validateProjectId(req, res, next) {
+	const { id } = req.params;
+	try {
+		const action = await Projects.get(id);
+		if (action) {
+			req.action = action;
+			next();
+		} else {
+			next({ ...Error(), status: 404, message: 'invalid id' });
+		}
+	} catch (err) {
+		next({ ...err, status: 500, message: 'error processing request' });
+	}
+}
+
+module.exports = {
+	validateAction,
+	validateActionId,
+	validateProject,
+	validateProjectId,
+};

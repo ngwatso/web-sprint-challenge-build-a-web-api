@@ -1,5 +1,7 @@
 // !! Write your "projects" router here!
 const projectsRouter = require('express').Router();
+// const validateProject = require('../middleware');
+// const validateProjectId = require('../middleware');
 
 const Projects = require('./projects-model');
 // ?? GET ==> /api/projects ==> Return array of projects
@@ -37,15 +39,31 @@ projectsRouter.get('/:id', (req, res) => {
 });
 
 // ** GET ==> /api/projects/:id/actions ==> Return array of actions associated with specified project
+projectsRouter.get('/:id/actions', (req, res) => {
+	Projects.getProjectActions(req.params.id)
+		.then((actions) => {
+			if (actions) {
+				res.status(200).json(actions);
+			} else {
+				res.status(404).json({
+					message: 'No actions for this project could be found',
+				});
+			}
+		})
+		.catch((err) => {
+			console.log(err);
+			res.status(500).json({ meessage: 'Error retrieving actions' });
+		});
+});
 
 // ?? POST ==> /api/projects ==> Return newly created project
 projectsRouter.post('/', async (req, res) => {
 	const project = req.body;
 
-	if (!project.name || !project.description || !project.completed) {
+	if (!project.name || !project.description) {
 		res.status(400).json({
 			message:
-				'Please provide name, description and completion data for the project',
+				'Please provide name and description data for the project',
 		});
 	} else {
 		try {
@@ -66,7 +84,7 @@ projectsRouter.put('/:id', async (req, res) => {
 	const { id } = req.params;
 	const project = req.body;
 	try {
-		const updatedProject = await Projects.update(id, post);
+		const updatedProject = await Projects.update(id, project);
 		if (project) {
 			res.status(200).json(updatedProject);
 		} else if (
@@ -84,7 +102,7 @@ projectsRouter.put('/:id', async (req, res) => {
 		}
 	} catch (err) {
 		console.log(err);
-		res.status.json({
+		res.status(500).json({
 			message: 'The project information could not be modified',
 		});
 	}
@@ -107,7 +125,7 @@ projectsRouter.delete('/:id', (req, res) => {
 		.catch((err) => {
 			console.log(err);
 			res.status(500).json({
-				message: 'The project copuld not be removed',
+				message: 'The project could not be removed',
 			});
 		});
 });

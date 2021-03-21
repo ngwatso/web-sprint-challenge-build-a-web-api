@@ -2,7 +2,7 @@
 const actionsRouter = require('express').Router();
 
 const Actions = require('./actions-model');
-const Middleware = require('../middleware');
+// const Middleware = require('../middleware');
 
 // ** Actions Endpoints
 
@@ -44,7 +44,7 @@ actionsRouter.get('/:id', (req, res) => {
 actionsRouter.post('/', async (req, res) => {
 	const action = req.body;
 
-	if (!action.description || !action.notes) {
+	if (!action.project_id || !action.description || !action.notes) {
 		res.status(400).json({
 			message: 'Please provide description and notes for the action',
 		});
@@ -70,10 +70,14 @@ actionsRouter.put('/:id', async (req, res) => {
 		const updatedAction = await Actions.update(id, action);
 		if (action) {
 			res.status(200).json(updatedAction);
-		} else if (!action.description || !action.notes) {
+		} else if (
+			!action.description ||
+			!action.notes ||
+			!action.completed
+		) {
 			res.status(400).json({
 				message:
-					'Please provide description and notes for the action',
+					'Please provide description, notes and completion for the action',
 			});
 		} else {
 			res.status(404).json({
